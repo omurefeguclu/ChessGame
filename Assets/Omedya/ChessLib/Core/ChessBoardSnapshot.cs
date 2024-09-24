@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Omedya.ChessLib.Pieces;
 using Omedya.ChessLib.Util;
+using UnityEngine;
 
 namespace Omedya.ChessLib.Core
 {
@@ -35,7 +37,8 @@ namespace Omedya.ChessLib.Core
             };
         }
 
-        public ChessBoardSnapshot(ChessBoard board, ChessPiece[,] pieces, Dictionary<(ChessTeam team, CastlingSide castlingSide), bool> canCastle)
+        public ChessBoardSnapshot(ChessBoard board, ChessPiece[,] pieces,
+            Dictionary<(ChessTeam team, CastlingSide castlingSide), bool> canCastle)
         {
             _board = board;
             _pieces = pieces;
@@ -46,20 +49,54 @@ namespace Omedya.ChessLib.Core
         
         #endregion
         
+        public void Initialize()
+        {
+            CurrentTurn = ChessTeam.White;
+            
+            /* Setup default table with pieces */
+            _pieces[0, 0] = new ChessRook(ChessTeam.White);
+            _pieces[1, 0] = new ChessKnight(ChessTeam.White);
+            _pieces[2, 0] = new ChessBishop(ChessTeam.White);
+            _pieces[3, 0] = new ChessQueen(ChessTeam.White);
+            _pieces[4, 0] = new ChessKing(ChessTeam.White);
+            _pieces[5, 0] = new ChessBishop(ChessTeam.White);
+            _pieces[6, 0] = new ChessKnight(ChessTeam.White);
+            _pieces[7, 0] = new ChessRook(ChessTeam.White);
+            for (var i = 0; i < 8; i++)
+            {
+                _pieces[i, 1] = new ChessPawn(ChessTeam.White);
+            }
+            
+            _pieces[0, 7] = new ChessRook(ChessTeam.Black);
+            _pieces[1, 7] = new ChessKnight(ChessTeam.Black);
+            _pieces[2, 7] = new ChessBishop(ChessTeam.Black);
+            _pieces[3, 7] = new ChessQueen(ChessTeam.Black);
+            _pieces[4, 7] = new ChessKing(ChessTeam.Black);
+            _pieces[5, 7] = new ChessBishop(ChessTeam.Black);
+            _pieces[6, 7] = new ChessKnight(ChessTeam.Black);
+            _pieces[7, 7] = new ChessRook(ChessTeam.Black);
+            for (var i = 0; i < 8; i++)
+            {
+                _pieces[i, 6] = new ChessPawn(ChessTeam.Black);
+            }
+            
+            SavedPossibleMovements = GetPossibleMovements().ToList();
+        }
         
 
         internal IEnumerable<ChessMovement> GetPossibleMovements()
         {
             // Calculate possible movements for each piece
-            for(int x = 0; x < 8; x++)
+            for(int x = 1; x <= 8; x++)
             {
-                for(int y = 0; y < 8; y++)
+                for(int y = 1; y <= 8; y++)
                 {
-                    var piece = _pieces[x, y];
+                    var square = _board.GetSquare(x, y);
+                    var piece = GetPiece(square);
                     if(piece is null || piece.Team != CurrentTurn)
                         continue;
 
-                    var possibleMovements = piece.GetPossibleMovements(_board.GetSquare(x, y), this);
+                    var possibleMovements = piece.GetPossibleMovements(square, this);
 
                     foreach (var movement in possibleMovements)
                     {
@@ -69,11 +106,11 @@ namespace Omedya.ChessLib.Core
             }
         }
 
-        public void PassTurn()
+        private void PassTurn()
         {
             if (CurrentTurn == ChessTeam.None)
             {
-                CurrentTurn = ChessTeam.White;   
+                throw new System.Exception("Current turn is None");
             }
             else
             {
@@ -83,14 +120,15 @@ namespace Omedya.ChessLib.Core
         }
         internal ChessSquare GetKingSquare(ChessTeam team)
         {
-            for (var x = 0; x < 8; x++)
+            for (var x = 1; x <= 8; x++)
             {
-                for (var y = 0; y < 8; y++)
+                for (var y = 1; y <= 8; y++)
                 {
-                    var piece = _pieces[x, y];
+                    var square = _board.GetSquare(x, y);
+                    var piece = GetPiece(square);
 
                     if (piece is ChessKing king && king.Team == team)
-                        return _board.GetSquare(x, y);
+                        return square;
                 }
             }
 
@@ -116,8 +154,8 @@ namespace Omedya.ChessLib.Core
             // Saving last movement before snapshot changes
             LastMovement = new ChessMovementInfo(movement, this);
             
-            _pieces[movement.End.X, movement.End.Y] = pieceToMove;
-            _pieces[movement.Start.X, movement.Start.Y] = null;
+            SetPiece(movement.End, pieceToMove);
+            SetPiece(movement.Start, null);
             
             PassTurn();
             SavedPossibleMovements = GetPossibleMovements().ToList();
@@ -174,26 +212,33 @@ namespace Omedya.ChessLib.Core
             if(pieceToMove is null)
                 throw new System.Exception("There is no piece to move at the given position");
         
-            var oldPiece = GetPiece(movement.End);
-        
-            _pieces[movement.End.X, movement.End.Y] = pieceToMove;
-            _pieces[movement.Start.X, movement.Start.Y] = null;
-            PassTurn();
             
-            return new RollbackUtil(() =>
+            SetPiece(movement.End, pieceToMove);
+            SetPiece(movement.Start, null);
+            PassTurn();
+
+            
+            void RollbackAction()
             {
-                _pieces[movement.Start.X, movement.Start.Y] = pieceToMove;
-                _pieces[movement.End.X, movement.End.Y] = oldPiece;
+                Debug.Log($"Rolling back the movement: {movement.Start} -> {movement.End}");
+                var oldPiece = GetPiece(movement.End);
                 
+                SetPiece(movement.Start, pieceToMove);
+                SetPiece(movement.End, oldPiece);
+
                 PassTurn();
-            });
+            }
+            
+            return new RollbackUtil(RollbackAction);
         }
         
         internal ChessBoardSnapshot Copy()
         {
             // Copy pieces
+            var snapshot = new ChessBoardSnapshot(_board, _pieces, CanCastle);
+            snapshot.CurrentTurn = CurrentTurn;
             
-            return new ChessBoardSnapshot(_board, _pieces, CanCastle);
+            return snapshot;
         }
     }
 }

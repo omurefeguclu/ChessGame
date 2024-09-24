@@ -2,6 +2,7 @@
 using Omedya.ChessLib.Core;
 using Omedya.ChessLib.Extensions;
 using Omedya.ChessLib.Pieces;
+using UnityEngine;
 
 namespace Omedya.ChessLib.Util
 {
@@ -19,19 +20,20 @@ namespace Omedya.ChessLib.Util
             {
                 return false;
             }
-            
-            if(board.TryGetOccupantTeam(movement.End, out var team) && team == movedPiece.Team)
+
+            if (board.TryGetOccupantTeam(movement.End, out var team) && team == movedPiece.Team)
             {
                 return false;
             }
 
-            var rollbackUtil = board.PerformTemporaryMovement(movement);
+            return true;
+            /*var rollbackUtil = board.PerformTemporaryMovement(movement);
             // Check if the king is in check
             var isKingInCheck = IsKingInCheck(board, movedPiece.Team);
-            
+
             rollbackUtil.Rollback();
-            
-            return !isKingInCheck;
+
+            return !isKingInCheck;*/
         }
 
         private static bool IsKingInCheck(ChessBoardSnapshot boardSnapshot, ChessTeam kingTeam)

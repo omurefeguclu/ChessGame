@@ -2,6 +2,7 @@
 using Omedya.ChessLib.Core;
 using Omedya.ChessLib.Extensions;
 using Omedya.ChessLib.SpecialMovements;
+using Omedya.ChessLib.Util;
 using UnityEngine;
 
 namespace Omedya.ChessLib.Pieces
@@ -24,19 +25,31 @@ namespace Omedya.ChessLib.Pieces
 
             if (boardSnapshot.IsSquareValid(newSquare) && !boardSnapshot.IsOccupied(newSquare))
             {
-                yield return new ChessMovement(position, newSquare);
+                var movement = new ChessMovement(position, newSquare);
 
-                // Double move
-                var isFirstMove = position.Y == pawnRow;
-                if (isFirstMove)
+                if(MovementValidationUtil.ValidateMove(boardSnapshot, movement))
                 {
-                    newSquare = position + direction + direction;
-            
-                    if (boardSnapshot.IsSquareValid(newSquare) && !boardSnapshot.IsOccupied(newSquare))
+                    yield return movement;
+
+                    // Double move
+                    var isFirstMove = position.Y == pawnRow;
+                    if (isFirstMove)
                     {
-                        yield return new ChessMovement(position, newSquare);
-                    }    
+                        newSquare = position + direction + direction;
+            
+                        if (boardSnapshot.IsSquareValid(newSquare) && !boardSnapshot.IsOccupied(newSquare))
+                        {
+                            var doubleMove = new ChessMovement(position, newSquare);
+                            
+                            if(MovementValidationUtil.ValidateMove(boardSnapshot, doubleMove))
+                            {
+                                yield return doubleMove;
+                            }
+                        }    
+                    }
                 }
+                
+                
             }
             
             
@@ -44,16 +57,26 @@ namespace Omedya.ChessLib.Pieces
 
             newSquare = position + direction + captureSideDirection;
             if (boardSnapshot.IsSquareValid(newSquare) && boardSnapshot.TryGetOccupantTeam(newSquare, out var occupantTeam) &&
-                occupantTeam != Team) 
+                occupantTeam != Team)
             {
-                yield return new ChessMovement(position, newSquare);
+                var movement = new ChessMovement(position, newSquare);
+                
+                if(MovementValidationUtil.ValidateMove(boardSnapshot, movement))
+                {
+                    yield return movement;
+                }
             }
             
             newSquare = position + direction - captureSideDirection;
             if (boardSnapshot.IsSquareValid(newSquare) && boardSnapshot.TryGetOccupantTeam(newSquare, out occupantTeam) &&
                 occupantTeam != Team) 
             {
-                yield return new ChessMovement(position, newSquare);
+                var movement = new ChessMovement(position, newSquare);
+                
+                if(MovementValidationUtil.ValidateMove(boardSnapshot, movement))
+                {
+                    yield return movement;
+                }
             }
             
             // En passant
@@ -67,7 +90,11 @@ namespace Omedya.ChessLib.Pieces
                 {
                     newSquare = capturedSquare + direction;    
                     
-                    yield return new EnPassantMove(position, newSquare, capturedSquare);
+                    var enPassantMove = new EnPassantMove(position, newSquare, capturedSquare);
+                    if(MovementValidationUtil.ValidateMove(boardSnapshot, enPassantMove))
+                    {
+                        yield return enPassantMove;
+                    }
                 }
                 
                 capturedSquare = position - captureSideDirection;
@@ -75,7 +102,11 @@ namespace Omedya.ChessLib.Pieces
                 {
                     newSquare = capturedSquare - captureSideDirection;
 
-                    yield return new EnPassantMove(position, newSquare, capturedSquare);
+                    var enPassantMove = new EnPassantMove(position, newSquare, capturedSquare);
+                    if(MovementValidationUtil.ValidateMove(boardSnapshot, enPassantMove))
+                    {
+                        yield return enPassantMove;
+                    }
                 }
             }
         }

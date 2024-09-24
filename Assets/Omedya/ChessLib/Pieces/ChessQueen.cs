@@ -12,6 +12,7 @@ namespace Omedya.ChessLib.Pieces
         {
         }
 
+        
         public override IEnumerable<ChessMovement> GetPossibleMovements(ChessSquare position, ChessBoardSnapshot boardSnapshot)
         {
             foreach ((int x, int y) direction in MovementConstants.AllDirections)
@@ -27,7 +28,7 @@ namespace Omedya.ChessLib.Pieces
                         yield return movement;
                     }
                     
-                    if(boardSnapshot.TryGetOccupantTeam(newSquare, out var team))
+                    if(boardSnapshot.IsOccupied(newSquare))
                     {
                         break;
                     }

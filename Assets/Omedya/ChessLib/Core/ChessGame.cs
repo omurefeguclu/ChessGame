@@ -5,7 +5,7 @@ namespace Omedya.ChessLib.Core
 {
     public class ChessGame
     {
-        public static ChessGame Default => new ChessGame();
+        public static ChessGame CreateDefaultGame() => new ChessGame();
         
         public ChessTeam Winner { get; private set; }
         public bool IsFinished { get; private set; }
@@ -21,7 +21,7 @@ namespace Omedya.ChessLib.Core
         {
             Board = ChessBoard.CreateDefaultBoard();
             CurrentSnapshot = new ChessBoardSnapshot(Board);
-            CurrentSnapshot.PassTurn();
+            CurrentSnapshot.Initialize();
             
             Winner = ChessTeam.None;
             IsFinished = false;
@@ -39,7 +39,7 @@ namespace Omedya.ChessLib.Core
             if (IsFinished)
                 return;
             
-            if (!CurrentSnapshot.GetPossibleMovements().Contains(movement))
+            if (!CurrentSnapshot.SavedPossibleMovements.Contains(movement))
                 return;
             
             var beforeSnapshot = CurrentSnapshot;

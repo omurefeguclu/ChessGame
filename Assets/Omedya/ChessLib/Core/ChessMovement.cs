@@ -11,5 +11,33 @@
             End = end;
         }
         
+        // Equality check
+        public override bool Equals(object obj)
+        {
+            if (obj is ChessMovement other)
+            {
+                return Equals(other);
+            }
+
+            return false;
+        }
+        public bool Equals(ChessMovement other)
+        {
+            return Start == other.Start && End == other.End;
+        }
+        
+        public static bool operator ==(ChessMovement a, ChessMovement b)
+        {
+            return a?.Equals(b) ?? b is null;
+        }
+        public static bool operator !=(ChessMovement a, ChessMovement b)
+        {
+            return !(a == b);
+        }
+        
+        public override int GetHashCode()
+        {
+            return Start.GetHashCode() ^ End.GetHashCode();
+        }
     }
 }

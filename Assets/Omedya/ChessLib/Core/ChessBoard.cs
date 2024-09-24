@@ -1,41 +1,48 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Omedya.ChessLib.Core;
-using Omedya.ChessLib.Pieces;
-using Omedya.ChessLib.Util;
-using UnityEngine;
-
-public class ChessBoard
+namespace Omedya.ChessLib.Core
 {
-    // Seperating squares from board to be able to implement custom game modes that have different board shapes
-    public readonly ChessSquare[,] Squares;
-    
-    public static ChessBoard CreateDefaultBoard()
+    public class ChessBoard
     {
-        var squares = new ChessSquare[8, 8];
+        // Seperating squares from board to be able to implement custom game modes that have different board shapes
+        public readonly ChessSquare[,] Squares;
+    
+        public static ChessBoard CreateDefaultBoard()
+        {
+            var squares = new ChessSquare[8, 8];
+            for (var x = 0; x < 8; x++)
+            {
+                for (var y = 0; y < 8; y++)
+                {
+                    squares[x, y] = new ChessSquare(x + 1, y + 1);
+                }
+            }
         
-        var board = new ChessBoard(squares);
+            var board = new ChessBoard(squares);
         
-        return board;
-    }
+            return board;
+        }
     
-    public ChessBoard(ChessSquare[,] squares)
-    {
-        Squares = squares;
-    }
+        public ChessBoard(ChessSquare[,] squares)
+        {
+            Squares = squares;
+        }
 
-    #region Getters
+        #region Getters
     
-    public ChessSquare GetSquare(int x, int y)
-    {
-        return Squares[x - 1, y - 1];
-    }
+        public ChessSquare GetSquare(int x, int y)
+        {
+            // Check for out of bounds
+            if(x < 1 || x > Squares.GetLength(0) || y < 1 || y > Squares.GetLength(1))
+                return null;
+            
+            return Squares[x - 1, y - 1];
+        }
     
-    #endregion
+        #endregion
 
     
     
     
     
+    }    
 }
+
