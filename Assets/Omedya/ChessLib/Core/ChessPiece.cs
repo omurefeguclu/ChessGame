@@ -16,7 +16,6 @@ namespace Omedya.ChessLib.Core
             return (ChessPiece) MemberwiseClone();
         }
 
-        public abstract IEnumerable<ChessMovement> GetPossibleMovements(ChessSquare position, ChessGame game,
-            ChessBoard board);
+        public abstract IEnumerable<ChessMovement> GetPossibleMovements(ChessSquare position, ChessBoardSnapshot boardSnapshot);
     }
 }

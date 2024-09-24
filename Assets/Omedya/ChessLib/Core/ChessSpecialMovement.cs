@@ -5,5 +5,7 @@
         protected ChessSpecialMovement(ChessSquare start, ChessSquare end) : base(start, end)
         {
         }
+        
+        public abstract void Execute(ChessBoardSnapshot boardSnapshot);
     }
 }

@@ -6,15 +6,15 @@ using Omedya.ChessLib.Util;
 
 namespace Omedya.ChessLib.Pieces
 {
-    public class ChessRook : ChessPiece
+    public class ChessBishop : ChessPiece
     {
-        public ChessRook(ChessTeam team) : base(team)
+        public ChessBishop(ChessTeam team) : base(team)
         {
         }
 
         public override IEnumerable<ChessMovement> GetPossibleMovements(ChessSquare position, ChessBoardSnapshot boardSnapshot)
         {
-            foreach ((int x, int y) direction in MovementConstants.CardinalDirections)
+            foreach ((int x, int y) direction in MovementConstants.DiagonalDirections)
             {
                 ChessSquare newSquare = position + direction;
                 

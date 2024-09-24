@@ -21,6 +21,16 @@ namespace Omedya.ChessLib.Core
         #region Equality
         
         // Operators
+        public static bool operator ==(ChessSquare left, (int x, int y) right)
+        {
+            return left?.Equals(right) ?? false;
+        }
+
+        public static bool operator !=(ChessSquare left, (int x, int y) right)
+        {
+            return !(left == right);
+        }
+
         public static bool operator ==(ChessSquare left, ChessSquare right)
         {
             return left?.Equals(right) ?? right is null;
@@ -30,10 +40,25 @@ namespace Omedya.ChessLib.Core
             return !(left == right);
         }
 
+        // Addition
         public static ChessSquare operator +(ChessSquare left, (int x, int y) direction)
         {
             return new ChessSquare(left.X + direction.x, left.Y + direction.y);
         }
+        public static ChessSquare operator +(ChessSquare left, ChessSquare right)
+        {
+            return new ChessSquare(left.X + right.X, left.Y + right.Y);
+        }
+        // Subtraction
+        public static ChessSquare operator -(ChessSquare left, (int x, int y) direction)
+        {
+            return new ChessSquare(left.X - direction.x, left.Y - direction.y);
+        }
+        public static (int x, int y) operator -(ChessSquare left, ChessSquare right)
+        {
+            return (left.X - right.X, left.Y - right.Y);
+        }
+        
         
         
         // Methods
@@ -48,6 +73,11 @@ namespace Omedya.ChessLib.Core
             
             return X == other.X && Y == other.Y;
         }
+        public bool Equals((int x, int y) other)
+        {
+            return X == other.x && Y == other.y;
+        }
+        
         
         public override int GetHashCode()
         {

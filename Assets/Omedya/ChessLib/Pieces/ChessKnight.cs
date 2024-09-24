@@ -6,19 +6,19 @@ using Omedya.ChessLib.Util;
 
 namespace Omedya.ChessLib.Pieces
 {
-    public class ChessRook : ChessPiece
+    public class ChessKnight : ChessPiece
     {
-        public ChessRook(ChessTeam team) : base(team)
+        public ChessKnight(ChessTeam team) : base(team)
         {
         }
 
         public override IEnumerable<ChessMovement> GetPossibleMovements(ChessSquare position, ChessBoardSnapshot boardSnapshot)
         {
-            foreach ((int x, int y) direction in MovementConstants.CardinalDirections)
+            foreach ((int x, int y) direction in MovementConstants.KnightMovements)
             {
                 ChessSquare newSquare = position + direction;
                 
-                while (boardSnapshot.IsSquareValid(newSquare))
+                if(boardSnapshot.IsSquareValid(newSquare))
                 {
                     var movement = new ChessMovement(position, newSquare);
                     
@@ -26,15 +26,8 @@ namespace Omedya.ChessLib.Pieces
                     {
                         yield return movement;
                     }
-                    
-                    if(boardSnapshot.TryGetOccupantTeam(newSquare, out var team))
-                    {
-                        break;
-                    }
-                    
-                    newSquare += direction;
                 }
             }
         }
-    }
+    }    
 }
