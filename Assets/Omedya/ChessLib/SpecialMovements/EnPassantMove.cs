@@ -4,6 +4,7 @@ namespace Omedya.ChessLib.SpecialMovements
 {
     public class EnPassantMove : ChessSpecialMovement
     {
+        // Ignore in serialization
         public ChessSquare CapturedPawnSquare { get; set; }
         
         private ChessPiece _capturedPiece;

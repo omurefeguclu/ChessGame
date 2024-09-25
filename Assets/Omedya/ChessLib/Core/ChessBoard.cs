@@ -5,6 +5,9 @@ namespace Omedya.ChessLib.Core
         // Seperating squares from board to be able to implement custom game modes that have different board shapes
         public readonly ChessSquare[,] Squares;
     
+        public int Width => Squares.GetLength(0);
+        public int Height => Squares.GetLength(1);
+        
         public static ChessBoard CreateDefaultBoard()
         {
             var squares = new ChessSquare[8, 8];
@@ -31,7 +34,7 @@ namespace Omedya.ChessLib.Core
         public ChessSquare GetSquare(int x, int y)
         {
             // Check for out of bounds
-            if(x < 1 || x > Squares.GetLength(0) || y < 1 || y > Squares.GetLength(1))
+            if(x < 1 || x > Width || y < 1 || y > Height)
                 return null;
             
             return Squares[x - 1, y - 1];

@@ -1,4 +1,5 @@
-﻿using Omedya.ChessLib.Util;
+﻿using Omedya.ChessLib.SpecialMovements;
+using Omedya.ChessLib.Util;
 
 namespace Omedya.ChessLib.Core
 {
@@ -17,7 +18,14 @@ namespace Omedya.ChessLib.Core
             
             BoardSnapshot = boardSnapshot;
             MovedPiece = boardSnapshot.GetPiece(movement.Start);
-            CapturedPiece = boardSnapshot.GetPiece(movement.End);
+            if (movement is EnPassantMove enPassantMove)
+            {
+                CapturedPiece = boardSnapshot.GetPiece(enPassantMove.CapturedPawnSquare);
+            }
+            else
+            {
+                CapturedPiece = boardSnapshot.GetPiece(movement.End);   
+            }
         }
         
         

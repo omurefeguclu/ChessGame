@@ -39,9 +39,9 @@ namespace Omedya.ChessLib.Core
         {
             if (IsFinished)
                 return false;
-            
-            if (!CurrentSnapshot.SavedPossibleMovements.Contains(movement))
-                return false;
+
+            // Check if the movement is valid
+            movement = CurrentSnapshot.GetPossibleMovement(movement.Start, movement.End);
             
             var beforeSnapshot = CurrentSnapshot;
             
@@ -53,7 +53,7 @@ namespace Omedya.ChessLib.Core
             SnapshotsHistory.Add(beforeSnapshot);
             
             
-            if (CurrentSnapshot.SavedPossibleMovements.Count == 0)
+            if (!CurrentSnapshot.AnyMovesAvailable)
             {
                 if (MovementValidationUtil.IsKingInCheck(CurrentSnapshot, CurrentSnapshot.CurrentTurn))
                 {

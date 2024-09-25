@@ -14,7 +14,10 @@ namespace Omedya.ChessLib.Core
         public ChessBoardSnapshot PreviousSnapshot { get; private set; }
         public Dictionary<(ChessTeam team, CastlingSide castlingSide), bool> CanCastle { get; }
         
+        
         public List<ChessMovement> SavedPossibleMovements { get; private set; }
+        
+        public bool AnyMovesAvailable => SavedPossibleMovements.Count > 0;
         public ChessBoard Board => _board;
         
         
@@ -28,7 +31,7 @@ namespace Omedya.ChessLib.Core
         {
             _board = board;
 
-            _pieces = new ChessPiece[board.Squares.GetLength(0), board.Squares.GetLength(1)];
+            _pieces = new ChessPiece[board.Width, board.Height];
             CanCastle = new()
             {
                 { (ChessTeam.White, CastlingSide.KingSide), true },
@@ -107,9 +110,9 @@ namespace Omedya.ChessLib.Core
             SavedPossibleMovements = new List<ChessMovement>();
             
             // Calculate possible movements for each piece
-            for(int x = 1; x <= _board.Squares.GetLength(0); x++)
+            for(int x = 1; x <= _board.Width; x++)
             {
-                for(int y = 1; y <= _board.Squares.GetLength(1); y++)
+                for(int y = 1; y <= _board.Height; y++)
                 {
                     var square = _board.GetSquare(x, y);
                     if (square is null)
@@ -156,7 +159,19 @@ namespace Omedya.ChessLib.Core
 
             throw new System.Exception("King not found");
         }
-        
+
+        public IEnumerable<ChessMovement> GetPossibleMovementsByStart(ChessSquare start)
+        {
+            return SavedPossibleMovements.Where(x => x.Start == start);
+        }
+        public IEnumerable<ChessMovement> GetPossibleMovementsByEnd(ChessSquare end)
+        {
+            return SavedPossibleMovements.Where(x => x.End == end);
+        }
+        public ChessMovement GetPossibleMovement(ChessSquare start, ChessSquare end)
+        {
+            return SavedPossibleMovements.FirstOrDefault(x => x.Start == start && x.End == end);
+        }
         
         public ChessPiece GetPiece(ChessSquare square)
         {

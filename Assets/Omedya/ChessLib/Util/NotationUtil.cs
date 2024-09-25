@@ -58,25 +58,24 @@ namespace Omedya.ChessLib.Util
                 var previousSnapshot = movementInfo.BoardSnapshot.PreviousSnapshot;
                 if (previousSnapshot is not null)
                 {
-                    foreach (var possibleMovement in previousSnapshot.SavedPossibleMovements)
+                    
+                    foreach (var possibleMovement in previousSnapshot.GetPossibleMovementsByEnd(movementInfo.Movement.End))
                     {
-                        if (possibleMovement.End == movementInfo.Movement.End)
+                        var movablePiece = previousSnapshot.GetPiece(possibleMovement.Start);
+
+                        // Check if the piece is the same type, same team and not the same piece
+                        if (movablePiece.GetType() != movementInfo.MovedPiece.GetType() ||
+                            movablePiece == movementInfo.MovedPiece ||
+                            movablePiece.Team != movementInfo.MovedPiece.Team) continue;
+                        
+                        // Decide if column or row will solve the ambiguity
+                        if(possibleMovement.Start.X == movementInfo.Movement.Start.X)
                         {
-                            var movablePiece = previousSnapshot.GetPiece(possibleMovement.Start);
-                            
-                            if(movablePiece.GetType() == movementInfo.MovedPiece.GetType() &&
-                               movablePiece != movementInfo.MovedPiece &&
-                               movablePiece.Team == movementInfo.MovedPiece.Team)
-                            {
-                                if(possibleMovement.Start.X == movementInfo.Movement.Start.X)
-                                {
-                                    notation += GetSquareRowNotation(movementInfo.Movement.Start);
-                                }
-                                else
-                                {
-                                    notation += GetSquareColumnNotation(movementInfo.Movement.Start);
-                                }
-                            }
+                            notation += GetSquareRowNotation(movementInfo.Movement.Start);
+                        }
+                        else
+                        {
+                            notation += GetSquareColumnNotation(movementInfo.Movement.Start);
                         }
                     }
                 }
@@ -105,7 +104,7 @@ namespace Omedya.ChessLib.Util
             var isKingInCheck = MovementValidationUtil.IsKingInCheck(movementInfo.BoardSnapshot, movementInfo.BoardSnapshot.CurrentTurn);
             if (isKingInCheck)
             {
-                if (movementInfo.BoardSnapshot.SavedPossibleMovements.Count == 0)
+                if (!movementInfo.BoardSnapshot.AnyMovesAvailable)
                 {
                     notation += "#";
                 }
@@ -156,12 +155,14 @@ namespace Omedya.ChessLib.Util
                     
                     processingNotation = processingNotation.Remove(processingNotation.Length - 1);
                     
+                    var startColumn = processingNotation[0] - 'a' + 1;
                     var endSquare = new ChessSquare(processingNotation[^2] - 'a' + 1, processingNotation[^1] - '1' + 1);
 
                     
                     foreach (var possibleMovement in possibleMovements)
                     {
-                        if (possibleMovement.End != endSquare || possibleMovement is not PromotionMove promotionMove)
+                        if (possibleMovement.Start.X != startColumn || possibleMovement.End != endSquare ||
+                            possibleMovement is not PromotionMove promotionMove)
                             continue;
                         
                         promotionMove.SelectPromotionPiece(promotionNewPiece);
