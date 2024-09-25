@@ -26,14 +26,13 @@ namespace Omedya.ChessLib.Util
                 return false;
             }
 
-            return true;
-            /*var rollbackUtil = board.PerformTemporaryMovement(movement);
+            var rollbackUtil = board.PerformTemporaryMovement(movement);
             // Check if the king is in check
             var isKingInCheck = IsKingInCheck(board, movedPiece.Team);
 
             rollbackUtil.Rollback();
 
-            return !isKingInCheck;*/
+            return !isKingInCheck;
         }
 
         private static bool IsKingInCheck(ChessBoardSnapshot boardSnapshot, ChessTeam kingTeam)
@@ -45,10 +44,9 @@ namespace Omedya.ChessLib.Util
         private static bool IsSquareAttacked(ChessSquare square, ChessBoardSnapshot boardSnapshot,
             ChessTeam friendlyTeam)
         {
-            foreach (var movement in boardSnapshot.GetPossibleMovements())
+            foreach (var controlledSquare in boardSnapshot.GetAttackedSquares(friendlyTeam))
             {
-                // TODO: Not attacked if the movement is castling
-                if (movement.End == square && boardSnapshot.GetPiece(movement.Start).Team != friendlyTeam)
+                if (controlledSquare == square && boardSnapshot.GetPiece(controlledSquare).Team != friendlyTeam)
                 {
                     return true;
                 }

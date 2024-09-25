@@ -54,56 +54,77 @@ namespace Omedya.ChessLib.Core
             CurrentTurn = ChessTeam.White;
             
             /* Setup default table with pieces */
-            _pieces[0, 0] = new ChessRook(ChessTeam.White);
-            _pieces[1, 0] = new ChessKnight(ChessTeam.White);
-            _pieces[2, 0] = new ChessBishop(ChessTeam.White);
-            _pieces[3, 0] = new ChessQueen(ChessTeam.White);
-            _pieces[4, 0] = new ChessKing(ChessTeam.White);
-            _pieces[5, 0] = new ChessBishop(ChessTeam.White);
-            _pieces[6, 0] = new ChessKnight(ChessTeam.White);
-            _pieces[7, 0] = new ChessRook(ChessTeam.White);
-            for (var i = 0; i < 8; i++)
-            {
-                _pieces[i, 1] = new ChessPawn(ChessTeam.White);
-            }
+            SetPiece(new ChessSquare(1, 1), new ChessRook(ChessTeam.White));
+            SetPiece(new ChessSquare(2, 1), new ChessKnight(ChessTeam.White));
+            SetPiece(new ChessSquare(3, 1), new ChessBishop(ChessTeam.White));
+            SetPiece(new ChessSquare(4, 1), new ChessQueen(ChessTeam.White));
+            SetPiece(new ChessSquare(5, 1), new ChessKing(ChessTeam.White));
+            SetPiece(new ChessSquare(6, 1), new ChessBishop(ChessTeam.White));
+            SetPiece(new ChessSquare(7, 1), new ChessKnight(ChessTeam.White));
+            SetPiece(new ChessSquare(8, 1), new ChessRook(ChessTeam.White));
             
-            _pieces[0, 7] = new ChessRook(ChessTeam.Black);
-            _pieces[1, 7] = new ChessKnight(ChessTeam.Black);
-            _pieces[2, 7] = new ChessBishop(ChessTeam.Black);
-            _pieces[3, 7] = new ChessQueen(ChessTeam.Black);
-            _pieces[4, 7] = new ChessKing(ChessTeam.Black);
-            _pieces[5, 7] = new ChessBishop(ChessTeam.Black);
-            _pieces[6, 7] = new ChessKnight(ChessTeam.Black);
-            _pieces[7, 7] = new ChessRook(ChessTeam.Black);
-            for (var i = 0; i < 8; i++)
-            {
-                _pieces[i, 6] = new ChessPawn(ChessTeam.Black);
-            }
-            
-            SavedPossibleMovements = GetPossibleMovements().ToList();
-        }
-        
+            SetPiece(new ChessSquare(1, 8), new ChessRook(ChessTeam.Black));
+            SetPiece(new ChessSquare(2, 8), new ChessKnight(ChessTeam.Black));
+            SetPiece(new ChessSquare(3, 8), new ChessBishop(ChessTeam.Black));
+            SetPiece(new ChessSquare(4, 8), new ChessQueen(ChessTeam.Black));
+            SetPiece(new ChessSquare(5, 8), new ChessKing(ChessTeam.Black));
+            SetPiece(new ChessSquare(6, 8), new ChessBishop(ChessTeam.Black));
+            SetPiece(new ChessSquare(7, 8), new ChessKnight(ChessTeam.Black));
+            SetPiece(new ChessSquare(8, 8), new ChessRook(ChessTeam.Black));
 
-        internal IEnumerable<ChessMovement> GetPossibleMovements()
-        {
-            // Calculate possible movements for each piece
-            for(int x = 1; x <= 8; x++)
+            for (var i = 1; i <= 8; i++)
             {
-                for(int y = 1; y <= 8; y++)
+                SetPiece(new ChessSquare(i, 2), new ChessPawn(ChessTeam.White));
+                SetPiece(new ChessSquare(i, 7), new ChessPawn(ChessTeam.Black));
+            }
+            
+            CalculatePossibleMovements();
+        }
+
+
+        internal IEnumerable<ChessSquare> GetAttackedSquares(ChessTeam friendlyTeam)
+        {
+            for (var x = 1; x <= 8; x++)
+            {
+                for (var y = 1; y <= 8; y++)
                 {
                     var square = _board.GetSquare(x, y);
+                    var piece = GetPiece(square);
+
+                    if (piece is null || piece.Team == friendlyTeam)
+                        continue;
+
+                    foreach (var controlledSquare in piece.GetControlledSquares(square, this))
+                    {
+                        yield return controlledSquare;
+                    }
+                }
+            }
+        }
+        private void CalculatePossibleMovements()
+        {
+            SavedPossibleMovements = new List<ChessMovement>();
+            
+            // Calculate possible movements for each piece
+            for(int x = 1; x <= _board.Squares.GetLength(0); x++)
+            {
+                for(int y = 1; y <= _board.Squares.GetLength(1); y++)
+                {
+                    var square = _board.GetSquare(x, y);
+                    if (square is null)
+                        continue;
+                    
                     var piece = GetPiece(square);
                     if(piece is null || piece.Team != CurrentTurn)
                         continue;
 
                     var possibleMovements = piece.GetPossibleMovements(square, this);
 
-                    foreach (var movement in possibleMovements)
-                    {
-                        yield return movement;
-                    }
+                    SavedPossibleMovements.AddRange(possibleMovements);
+                    
                 }
             }
+            
         }
 
         private void PassTurn()
@@ -138,11 +159,30 @@ namespace Omedya.ChessLib.Core
         
         public ChessPiece GetPiece(ChessSquare square)
         {
-            return _pieces[square.X - 1, square.Y - 1];
+            if (square is null)
+                throw new System.ArgumentNullException(nameof(square));
+            
+            return _pieces[square.X - 1, square.Y - 1];;
         }
         public void SetPiece(ChessSquare square, ChessPiece piece)
         {
+            if (square is null)
+                throw new System.ArgumentNullException(nameof(square));
+            
             _pieces[square.X - 1, square.Y - 1] = piece;
+        }
+        
+        private void PerformMovementCore(ChessPiece pieceToMove, ChessMovement movement)
+        {
+            if (movement is ChessSpecialMovement specialMovement)
+            {
+                specialMovement.Execute(this);
+            }
+            else
+            {
+                SetPiece(movement.End, pieceToMove);
+                SetPiece(movement.Start, null);
+            }
         }
         
         public void PerformMovement(ChessMovement movement)
@@ -154,15 +194,43 @@ namespace Omedya.ChessLib.Core
             // Saving last movement before snapshot changes
             LastMovement = new ChessMovementInfo(movement, this);
             
-            SetPiece(movement.End, pieceToMove);
-            SetPiece(movement.Start, null);
+            PerformMovementCore(pieceToMove, movement);
             
             PassTurn();
-            SavedPossibleMovements = GetPossibleMovements().ToList();
+            CalculatePossibleMovements();
             
             CheckCastleDisablement(pieceToMove, movement);
         }
+        // Returns rollback action
+        internal RollbackUtil PerformTemporaryMovement(ChessMovement movement)
+        {
+            var pieceToMove = GetPiece(movement.Start);
+            if(pieceToMove is null)
+                throw new System.Exception("There is no piece to move at the given position");
+        
+            var oldPiece = GetPiece(movement.End);
+            
+            PerformMovementCore(pieceToMove, movement);
+            PassTurn();
 
+            return new RollbackUtil(RollbackAction);
+
+            void RollbackAction()
+            {
+                if(movement is ChessSpecialMovement specialMovement)
+                {
+                    specialMovement.Rollback(this);
+                }
+                else
+                {
+                    SetPiece(movement.Start, pieceToMove);
+                    SetPiece(movement.End, oldPiece);
+                }
+
+                PassTurn();
+            }
+        }
+        
         private void CheckCastleDisablement(ChessPiece pieceToMove, ChessMovement movement)
         {
             // Disable castling
@@ -205,32 +273,7 @@ namespace Omedya.ChessLib.Core
                 }
             }
         }
-        // Returns rollback action
-        internal RollbackUtil PerformTemporaryMovement(ChessMovement movement)
-        {
-            var pieceToMove = GetPiece(movement.Start);
-            if(pieceToMove is null)
-                throw new System.Exception("There is no piece to move at the given position");
         
-            
-            SetPiece(movement.End, pieceToMove);
-            SetPiece(movement.Start, null);
-            PassTurn();
-
-            
-            void RollbackAction()
-            {
-                Debug.Log($"Rolling back the movement: {movement.Start} -> {movement.End}");
-                var oldPiece = GetPiece(movement.End);
-                
-                SetPiece(movement.Start, pieceToMove);
-                SetPiece(movement.End, oldPiece);
-
-                PassTurn();
-            }
-            
-            return new RollbackUtil(RollbackAction);
-        }
         
         internal ChessBoardSnapshot Copy()
         {

@@ -7,5 +7,6 @@
         }
         
         public abstract void Execute(ChessBoardSnapshot boardSnapshot);
+        public abstract void Rollback(ChessBoardSnapshot boardSnapshot);
     }
 }

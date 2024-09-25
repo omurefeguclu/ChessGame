@@ -11,11 +11,12 @@ namespace Omedya.ChessLib.Core
             Team = team;
         }
         
-        public ChessPiece Copy()
-        {
-            return (ChessPiece) MemberwiseClone();
-        }
-
+        public abstract IEnumerable<ChessSquare> GetControlledSquares(ChessSquare position, ChessBoardSnapshot boardSnapshot);
         public abstract IEnumerable<ChessMovement> GetPossibleMovements(ChessSquare position, ChessBoardSnapshot boardSnapshot);
+
+        public override string ToString()
+        {
+            return $"{Team} {GetType().Name}";
+        }
     }
 }

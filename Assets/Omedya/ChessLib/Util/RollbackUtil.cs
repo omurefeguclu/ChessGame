@@ -6,10 +6,6 @@ namespace Omedya.ChessLib.Util
     {
         private Action _rollbackAction;
         
-        public RollbackUtil()
-        {
-        }
-        
         public RollbackUtil(Action rollbackAction)
         {
             _rollbackAction = rollbackAction;

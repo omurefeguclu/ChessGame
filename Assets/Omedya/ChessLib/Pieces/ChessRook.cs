@@ -12,7 +12,7 @@ namespace Omedya.ChessLib.Pieces
         {
         }
 
-        public override IEnumerable<ChessMovement> GetPossibleMovements(ChessSquare position, ChessBoardSnapshot boardSnapshot)
+        public override IEnumerable<ChessSquare> GetControlledSquares(ChessSquare position, ChessBoardSnapshot boardSnapshot)
         {
             foreach ((int x, int y) direction in MovementConstants.CardinalDirections)
             {
@@ -20,19 +20,27 @@ namespace Omedya.ChessLib.Pieces
                 
                 while (boardSnapshot.IsSquareValid(newSquare))
                 {
-                    var movement = new ChessMovement(position, newSquare);
+                    yield return newSquare;
                     
-                    if(MovementValidationUtil.ValidateMove(boardSnapshot, movement))
-                    {
-                        yield return movement;
-                    }
-                    
-                    if(boardSnapshot.TryGetOccupantTeam(newSquare, out var team))
+                    if(boardSnapshot.IsOccupied(newSquare))
                     {
                         break;
                     }
                     
                     newSquare += direction;
+                }
+            }
+        }
+
+        public override IEnumerable<ChessMovement> GetPossibleMovements(ChessSquare position, ChessBoardSnapshot boardSnapshot)
+        {
+            foreach (var square in GetControlledSquares(position, boardSnapshot))
+            {
+                var movement = new ChessMovement(position, square);
+                
+                if(MovementValidationUtil.ValidateMove(boardSnapshot, movement))
+                {
+                    yield return movement;
                 }
             }
         }

@@ -37,7 +37,10 @@
         
         public override int GetHashCode()
         {
-            return Start.GetHashCode() ^ End.GetHashCode();
+            unchecked
+            {
+                return (Start.GetHashCode() * 397) ^ End.GetHashCode();
+            }
         }
     }
 }

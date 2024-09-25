@@ -13,11 +13,6 @@ namespace Omedya.ChessLib.Core
             Y = y;
         }
         
-        public ChessSquare Copy()
-        {
-            return new ChessSquare(this.X, this.Y);
-        }
-        
         #region Equality
         
         // Operators
@@ -82,7 +77,10 @@ namespace Omedya.ChessLib.Core
         public override int GetHashCode()
         {
             // Generate hash code by x and y
-            return HashCode.Combine(X, Y);
+            unchecked
+            {
+                return (X * 397) ^ Y;
+            }
         }
         
         #endregion

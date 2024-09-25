@@ -34,13 +34,13 @@ namespace Omedya.ChessLib.Core
             IsFinished = isFinished;
         }
 
-        public void MovePiece(ChessMovement movement)
+        public bool MovePiece(ChessMovement movement)
         {
             if (IsFinished)
-                return;
+                return false;
             
             if (!CurrentSnapshot.SavedPossibleMovements.Contains(movement))
-                return;
+                return false;
             
             var beforeSnapshot = CurrentSnapshot;
             
@@ -57,6 +57,8 @@ namespace Omedya.ChessLib.Core
                 Winner = CurrentSnapshot.CurrentTurn == ChessTeam.White ? ChessTeam.Black : ChessTeam.White;
                 IsFinished = true;
             }
+
+            return true;
         }
 
         public void RollbackToSnapshot(int index)
