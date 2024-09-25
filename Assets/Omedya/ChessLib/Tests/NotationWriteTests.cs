@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Omedya.ChessLib.Core;
 
-public class NotationTests
+public class NotationWriteTests
 {
     
     private ChessGame _chessGame;

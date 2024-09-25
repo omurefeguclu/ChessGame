@@ -117,5 +117,124 @@ namespace Omedya.ChessLib.Util
             
             return notation;
         }
+        
+        public static ChessMovement ParseMovement(string movementNotation, ChessBoardSnapshot boardSnapshot)
+        {
+            var possibleMovements = boardSnapshot.SavedPossibleMovements;
+            
+            // Check for castling
+            if (movementNotation == "O-O")
+            {
+                return possibleMovements.First(m => m is CastlingMove castlingMove && castlingMove.CastlingSide == CastlingSide.KingSide);
+            }
+            else if (movementNotation == "O-O-O")
+            {
+                return possibleMovements.First(m => m is CastlingMove castlingMove && castlingMove.CastlingSide == CastlingSide.QueenSide);
+            }
+            else
+            {
+                // Remove +, #, x from the notation
+                var processingNotation = movementNotation.Replace("+", "").Replace("#", "").Replace("x", "");
+                
+                // Check for promotion
+                var promotionIndex = processingNotation.IndexOf('=');
+                
+                // Promotion Movement
+                if(promotionIndex != -1)
+                {
+                    processingNotation = processingNotation.Remove(promotionIndex);
+                    
+                    var promotionPiece = processingNotation[^1];
+                    ChessPiece promotionNewPiece = promotionPiece switch
+                    {
+                        'N' => new ChessKnight(boardSnapshot.CurrentTurn),
+                        'B' => new ChessBishop(boardSnapshot.CurrentTurn),
+                        'R' => new ChessRook(boardSnapshot.CurrentTurn),
+                        'Q' => new ChessQueen(boardSnapshot.CurrentTurn),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    
+                    processingNotation = processingNotation.Remove(processingNotation.Length - 1);
+                    
+                    var endSquare = new ChessSquare(processingNotation[^2] - 'a' + 1, processingNotation[^1] - '1' + 1);
+
+                    
+                    foreach (var possibleMovement in possibleMovements)
+                    {
+                        if (possibleMovement.End != endSquare || possibleMovement is not PromotionMove promotionMove)
+                            continue;
+                        
+                        promotionMove.SelectPromotionPiece(promotionNewPiece);
+                            
+                        return promotionMove;
+                    }
+                }
+                else
+                {
+                    // x is removed, so if the move was take input should be something like cb8 (if pawn), otherwise input should be like b8 (if pawn), or Nf3 (if knight)
+                    var endSquare = new ChessSquare(processingNotation[^2] - 'a' + 1, processingNotation[^1] - '1' + 1);
+                    
+                    // if first letter is between 'a' and 'h' it is a pawn move, otherwise it is a piece move
+                    if (processingNotation[0] >= 'a' && processingNotation[0] <= 'h')
+                    {
+                        processingNotation = processingNotation.Insert(0, "P");
+                    }
+                    
+                    var pieceTypeCharacter = processingNotation[0];
+                    Func<ChessPiece, bool> typeCheck = pieceTypeCharacter switch
+                    {
+                        'N' => piece => piece is ChessKnight,
+                        'B' => piece => piece is ChessBishop,
+                        'R' => piece => piece is ChessRook,
+                        'Q' => piece => piece is ChessQueen,
+                        'K' => piece => piece is ChessKing,
+                        'P' => piece => piece is ChessPawn,
+                        _ => throw new ArgumentException()
+                    };
+                    Func<ChessMovement, bool> ambiguityCheck;
+                    
+                    // Check for ambiguity (if there are multiple pieces that can move to the same square)
+                    if (processingNotation.Length == 4)
+                    {
+                        // Either column or row is specified
+                        var ambiguityCharacter = processingNotation[1];
+                        switch (ambiguityCharacter)
+                        {
+                            case >= 'a' and <= 'h':
+                                var ambiguityColumn = ambiguityCharacter - 'a' + 1;
+                                
+                                ambiguityCheck = movement => movement.Start.X == ambiguityColumn;
+                                break;
+                            case >= '1' and <= '8':
+                                var ambiguityRow = ambiguityCharacter - '1' + 1;
+                                
+                                ambiguityCheck = movement => movement.Start.Y == ambiguityRow;
+                                break;
+                            default:
+                                throw new Exception("Unexpected ambiguity character");
+                        }
+                        
+                    }
+                    else
+                    {
+                        ambiguityCheck = movement => true;
+                    }
+
+                    foreach (var possibleMovement in possibleMovements)
+                    {
+                        var piece = boardSnapshot.GetPiece(possibleMovement.Start);
+                        if (possibleMovement.End != endSquare || !typeCheck(piece) ||
+                            !ambiguityCheck(possibleMovement))
+                            continue;
+
+                        return possibleMovement;
+                    }
+
+                }
+                
+                throw new Exception("Movement invalid");
+            }
+            
+        }
     }
 }
