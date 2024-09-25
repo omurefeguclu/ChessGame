@@ -1,4 +1,5 @@
 ﻿using System;
+using Omedya.ChessLib.Util;
 
 namespace Omedya.ChessLib.Core
 {
@@ -12,7 +13,12 @@ namespace Omedya.ChessLib.Core
             X = x;
             Y = y;
         }
-        
+
+        public override string ToString()
+        {
+            return NotationUtil.GetSquareNotation(this);
+        }
+
         #region Equality
         
         // Operators

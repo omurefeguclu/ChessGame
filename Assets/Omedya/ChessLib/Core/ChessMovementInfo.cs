@@ -1,21 +1,29 @@
-﻿namespace Omedya.ChessLib.Core
+﻿using Omedya.ChessLib.Util;
+
+namespace Omedya.ChessLib.Core
 {
     public class ChessMovementInfo
     {
-        public ChessSquare Start { get; }
-        public ChessSquare End { get; }
+        public ChessMovement Movement { get; }
         
         
-        public ChessPiece StartPiece { get; }
-        public ChessPiece EndPiece { get; }
+        public ChessPiece MovedPiece { get; }
+        public ChessPiece CapturedPiece { get; }
+        public ChessBoardSnapshot BoardSnapshot { get; }
         
         public ChessMovementInfo(ChessMovement movement, ChessBoardSnapshot boardSnapshot)
         {
-            Start = movement.Start;
-            End = movement.End;
+            Movement = movement;
             
-            StartPiece = boardSnapshot.GetPiece(Start);
-            EndPiece = boardSnapshot.GetPiece(End);
+            BoardSnapshot = boardSnapshot;
+            MovedPiece = boardSnapshot.GetPiece(movement.Start);
+            CapturedPiece = boardSnapshot.GetPiece(movement.End);
+        }
+        
+        
+        public override string ToString()
+        {
+            return NotationUtil.GetMovementNotation(this);
         }
     }
 }

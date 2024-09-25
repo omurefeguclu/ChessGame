@@ -1,4 +1,6 @@
-﻿namespace Omedya.ChessLib.Core
+﻿using Omedya.ChessLib.Util;
+
+namespace Omedya.ChessLib.Core
 {
     public class ChessMovement
     {
@@ -10,7 +12,7 @@
             Start = start;
             End = end;
         }
-        
+
         // Equality check
         public override bool Equals(object obj)
         {

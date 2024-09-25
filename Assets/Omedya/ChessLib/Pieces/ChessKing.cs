@@ -63,7 +63,7 @@ namespace Omedya.ChessLib.Pieces
                 if (CanPerformKingMovementForCastling(position, boardSnapshot, castlingDirection))
                 {
                     yield return new CastlingMove(position, position + castlingDirection + castlingDirection,
-                        rookSquare);
+                        CastlingSide.KingSide, rookSquare);
                 }
             }
             // Queen side
@@ -76,7 +76,7 @@ namespace Omedya.ChessLib.Pieces
                 if (CanPerformKingMovementForCastling(position, boardSnapshot, castlingDirection))
                 {
                     yield return new CastlingMove(position, position + castlingDirection + castlingDirection,
-                        rookSquare);
+                        CastlingSide.QueenSide, rookSquare);
                 }
             }
             

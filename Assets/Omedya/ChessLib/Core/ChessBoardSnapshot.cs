@@ -11,6 +11,7 @@ namespace Omedya.ChessLib.Core
     {
         public ChessTeam CurrentTurn { get; private set; }
         public ChessMovementInfo LastMovement { get; private set; }
+        public ChessBoardSnapshot PreviousSnapshot { get; private set; }
         public Dictionary<(ChessTeam team, CastlingSide castlingSide), bool> CanCastle { get; }
         
         public List<ChessMovement> SavedPossibleMovements { get; private set; }
@@ -275,11 +276,24 @@ namespace Omedya.ChessLib.Core
         }
         
         
-        internal ChessBoardSnapshot Copy()
+        internal ChessBoardSnapshot NewSnapshotByCopy()
         {
-            // Copy pieces
-            var snapshot = new ChessBoardSnapshot(_board, _pieces, CanCastle);
+            // Copy pieces array
+            var width = _pieces.GetLength(0);
+            var height = _pieces.GetLength(1);
+            
+            var pieces = new ChessPiece[width, height];
+            for (var x = 0; x < width; x++)
+            {
+                for (var y = 0; y < height; y++)
+                {
+                    pieces[x, y] = _pieces[x, y];
+                }
+            }
+            
+            var snapshot = new ChessBoardSnapshot(_board, pieces, CanCastle);
             snapshot.CurrentTurn = CurrentTurn;
+            snapshot.PreviousSnapshot = this;
             
             return snapshot;
         }

@@ -35,7 +35,7 @@ namespace Omedya.ChessLib.Util
             return !isKingInCheck;
         }
 
-        private static bool IsKingInCheck(ChessBoardSnapshot boardSnapshot, ChessTeam kingTeam)
+        public static bool IsKingInCheck(ChessBoardSnapshot boardSnapshot, ChessTeam kingTeam)
         {
             var kingSquare = boardSnapshot.GetKingSquare(kingTeam);
             
@@ -46,7 +46,7 @@ namespace Omedya.ChessLib.Util
         {
             foreach (var controlledSquare in boardSnapshot.GetAttackedSquares(friendlyTeam))
             {
-                if (controlledSquare == square && boardSnapshot.GetPiece(controlledSquare).Team != friendlyTeam)
+                if (controlledSquare == square && boardSnapshot.GetPiece(controlledSquare).Team == friendlyTeam)
                 {
                     return true;
                 }

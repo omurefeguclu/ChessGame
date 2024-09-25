@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Omedya.ChessLib.Util;
 
 namespace Omedya.ChessLib.Core
 {
@@ -44,7 +45,7 @@ namespace Omedya.ChessLib.Core
             
             var beforeSnapshot = CurrentSnapshot;
             
-            var newSnapshot = CurrentSnapshot.Copy();
+            var newSnapshot = CurrentSnapshot.NewSnapshotByCopy();
             newSnapshot.PerformMovement(movement);
             
             CurrentSnapshot = newSnapshot;
@@ -54,7 +55,15 @@ namespace Omedya.ChessLib.Core
             
             if (CurrentSnapshot.SavedPossibleMovements.Count == 0)
             {
-                Winner = CurrentSnapshot.CurrentTurn == ChessTeam.White ? ChessTeam.Black : ChessTeam.White;
+                if (MovementValidationUtil.IsKingInCheck(CurrentSnapshot, CurrentSnapshot.CurrentTurn))
+                {
+                    Winner = CurrentSnapshot.CurrentTurn == ChessTeam.White ? ChessTeam.Black : ChessTeam.White;
+                }
+                else
+                {
+                    Winner = ChessTeam.None;
+                }
+                
                 IsFinished = true;
             }
 

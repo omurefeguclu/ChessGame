@@ -3,6 +3,7 @@ using Omedya.ChessLib.Constants;
 using Omedya.ChessLib.Core;
 using Omedya.ChessLib.Extensions;
 using Omedya.ChessLib.Util;
+using UnityEngine;
 
 namespace Omedya.ChessLib.Pieces
 {

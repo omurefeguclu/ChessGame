@@ -24,7 +24,7 @@ public class ChessPawnMovementTests
     public void ChessGame_MovePiece_ShouldMovePawn()
     {
         var movement = new ChessMovement(new ChessSquare(1, 2), new ChessSquare(1, 3));
-        _chessGame.MovePiece(movement);
+        Assert.IsTrue(_chessGame.MovePiece(movement));
         
         Assert.AreEqual(1, _chessGame.SnapshotsHistory.Count);
         Assert.AreEqual(ChessTeam.Black, _chessGame.CurrentSnapshot.CurrentTurn);
@@ -34,7 +34,16 @@ public class ChessPawnMovementTests
     public void ChessGame_MovePiece_ShouldDoubleMovePawn()
     {
         var movement = new ChessMovement(new ChessSquare(1, 2), new ChessSquare(1, 4));
-        _chessGame.MovePiece(movement);
+        Assert.IsTrue(_chessGame.MovePiece(movement));
+        
+        Assert.AreEqual(1, _chessGame.SnapshotsHistory.Count);
+        Assert.AreEqual(ChessTeam.Black, _chessGame.CurrentSnapshot.CurrentTurn);
+    }
+    [Test]
+    public void ChessGame_MovePiece_ShouldDoubleMovePawn_2()
+    {
+        var movement = new ChessMovement(new ChessSquare(5, 2), new ChessSquare(5, 4));
+        Assert.IsTrue(_chessGame.MovePiece(movement));
         
         Assert.AreEqual(1, _chessGame.SnapshotsHistory.Count);
         Assert.AreEqual(ChessTeam.Black, _chessGame.CurrentSnapshot.CurrentTurn);

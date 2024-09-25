@@ -94,22 +94,22 @@ namespace Omedya.ChessLib.Pieces
             
             // En passant
             var lastMovement = boardSnapshot.LastMovement;
-            if (lastMovement?.StartPiece is ChessPawn lastPawn &&
-                lastPawn.Team != Team && lastMovement.End.Y == position.Y)
+            if (lastMovement?.MovedPiece is ChessPawn lastPawn &&
+                lastPawn.Team != Team && lastMovement.Movement.End.Y == position.Y)
             {
-                var displacement = lastMovement.End - lastMovement.Start;
+                var displacement = lastMovement.Movement.End - lastMovement.Movement.Start;
                 var isDoubleMove = (displacement.x == 0 && Mathf.Abs(displacement.y) == 2) ||
                                    // This is a special case for future board shapes
                                    (displacement.y == 0 && Mathf.Abs(displacement.x) == 2);
 
                 if (isDoubleMove)
                 {
-                    var offset = lastMovement.End - position;
+                    var offset = lastMovement.Movement.End - position;
                     if (offset == captureSideDirection || offset == (-captureSideDirection.x, -captureSideDirection.y))
                     {
                         newSquare = position + direction + offset;
                         
-                        var enPassantMove = new EnPassantMove(position, newSquare, lastMovement.End);
+                        var enPassantMove = new EnPassantMove(position, newSquare, lastMovement.Movement.End);
                         if(MovementValidationUtil.ValidateMove(boardSnapshot, enPassantMove))
                         {
                             yield return enPassantMove;

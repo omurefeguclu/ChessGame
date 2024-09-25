@@ -5,14 +5,16 @@ namespace Omedya.ChessLib.SpecialMovements
 {
     public class CastlingMove : ChessSpecialMovement
     {
+        public CastlingSide CastlingSide { get; }
         public ChessSquare RookSquare { get; set; }
         
         private ChessSquare _newRookSquare;
         private ChessPiece _rookPiece;
         private ChessPiece _kingPiece;
         
-        public CastlingMove(ChessSquare start, ChessSquare end, ChessSquare rookSquare) : base(start, end)
+        public CastlingMove(ChessSquare start, ChessSquare end, CastlingSide castlingSide, ChessSquare rookSquare) : base(start, end)
         {
+            CastlingSide = castlingSide;
             RookSquare = rookSquare;
         }
 

@@ -5,7 +5,7 @@ namespace Omedya.ChessLib.SpecialMovements
 {
     public class PromotionMove : ChessSpecialMovement
     {
-        private ChessPiece _promotionNewPiece;
+        public ChessPiece PromotionNewPiece { get; private set; }
         private ChessPiece _promotedPawn;
         
         private ChessPiece _capturedPiece;
@@ -20,7 +20,7 @@ namespace Omedya.ChessLib.SpecialMovements
             if(piece is ChessKing)
                 throw new System.Exception("King cannot be selected as promotion piece");
             
-            _promotionNewPiece = piece;
+            PromotionNewPiece = piece;
         }
 
 
@@ -30,10 +30,10 @@ namespace Omedya.ChessLib.SpecialMovements
             _capturedPiece = boardSnapshot.GetPiece(End);
             
             // If promotion piece is not selected, default to Queen (for possible movement calc.)
-            _promotionNewPiece ??= new ChessQueen(_promotedPawn.Team);
+            PromotionNewPiece ??= new ChessQueen(_promotedPawn.Team);
             
             boardSnapshot.SetPiece(Start, null);
-            boardSnapshot.SetPiece(End, _promotionNewPiece);
+            boardSnapshot.SetPiece(End, PromotionNewPiece);
         }
 
         public override void Rollback(ChessBoardSnapshot boardSnapshot)
