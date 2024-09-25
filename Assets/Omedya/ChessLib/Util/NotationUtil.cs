@@ -70,11 +70,11 @@ namespace Omedya.ChessLib.Util
                             {
                                 if(possibleMovement.Start.X == movementInfo.Movement.Start.X)
                                 {
-                                    notation += GetSquareColumnNotation(movementInfo.Movement.Start);
+                                    notation += GetSquareRowNotation(movementInfo.Movement.Start);
                                 }
                                 else
                                 {
-                                    notation += GetSquareRowNotation(movementInfo.Movement.Start);
+                                    notation += GetSquareColumnNotation(movementInfo.Movement.Start);
                                 }
                             }
                         }

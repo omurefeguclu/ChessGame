@@ -36,9 +36,6 @@ public class ChessGameInitializationTests
     {
         var piece = _chessGame.CurrentSnapshot.GetPiece(new ChessSquare(x, y));
         
-        Debug.Log($"Asserting x: {x}, y: {y}, team: {team}");
-        Debug.Log($"Info: x: {x}, y: {y}, team: {piece?.Team}");
-        
         Assert.IsNotNull(piece);
         Assert.AreEqual(team, piece.Team);
         Assert.IsInstanceOf<TPiece>(piece);
@@ -48,8 +45,6 @@ public class ChessGameInitializationTests
     [Order(-int.MaxValue + 1)]
     public void ChessGame_DefaultGame_CheckInitialPieces()
     {
-        Debug.Log("ChessGame_DefaultGame_CheckInitialPieces");
-        
         AssertPiece<ChessRook>(1, 1, ChessTeam.White);
         AssertPiece<ChessKnight>(2, 1, ChessTeam.White);
         AssertPiece<ChessBishop>(3, 1, ChessTeam.White);
